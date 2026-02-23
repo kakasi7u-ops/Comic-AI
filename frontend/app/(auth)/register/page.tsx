@@ -20,6 +20,7 @@ import { AuthCard } from "@/components/auth/auth-card"
 import { PasswordInput } from "@/components/auth/password-input"
 import { registerSchema, type RegisterFormValues } from "@/lib/schemas/auth"
 import { useAuthStore } from "@/lib/store/auth-store"
+import { AxiosError } from "axios"
 
 export default function RegisterPage() {
     const router = useRouter()
@@ -38,24 +39,19 @@ export default function RegisterPage() {
 
     async function onSubmit(data: RegisterFormValues) {
         setIsLoading(true)
-
-        await new Promise((resolve) => setTimeout(resolve, 1500))
-
         try {
-            register({
-                id: "2",
-                name: data.name,
-                email: data.email,
-                plan: "Free",
-            })
+            await register(data.name, data.email, data.password)
             toast.success("Account created!", {
-                description: "You have effectively signed up.",
+                description: "Welcome to MyComic AI.",
             })
             router.push("/dashboard")
-        } catch {
-            toast.error("Registration failed.", {
-                description: "Please try again.",
-            })
+        } catch (error) {
+            let message = "Registration failed. Please try again."
+            if (error instanceof AxiosError) {
+                const detail = error.response?.data?.detail
+                if (typeof detail === "string") message = detail
+            }
+            toast.error("Registration failed", { description: message })
         } finally {
             setIsLoading(false)
         }

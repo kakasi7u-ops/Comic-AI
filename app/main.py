@@ -43,8 +43,12 @@ async def startup_event():
     Connects to MongoDB and initializes Beanie with all models.
     Creates indexes automatically.
     """
-    await init_db()
-    print(f"✅ {settings.APP_NAME} v{settings.APP_VERSION} started")
+    try:
+        await init_db()
+        print(f"✅ {settings.APP_NAME} v{settings.APP_VERSION} started")
+    except Exception as e:
+        print(f"⚠️  Database connection failed: {e}")
+        print(f"⚠️  {settings.APP_NAME} v{settings.APP_VERSION} started WITHOUT database — endpoints requiring DB will fail")
 
 
 @app.on_event("shutdown")

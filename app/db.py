@@ -46,14 +46,13 @@ async def init_db() -> AsyncIOMotorClient:
         async def startup_event():
             await init_db()
     """
-    # Create Motor async client with SSL certificate bypass for development
-    # For production, use proper certificate validation
+    # tlsInsecure=True disables cert verification — acceptable for dev, use proper certs in prod
     client = AsyncIOMotorClient(
         MONGODB_URL,
-        tlsAllowInvalidCertificates=True,
-        serverSelectionTimeoutMS=30000,
-        connectTimeoutMS=30000,
-        socketTimeoutMS=30000,
+        tlsInsecure=True,
+        serverSelectionTimeoutMS=5000,
+        connectTimeoutMS=5000,
+        socketTimeoutMS=5000,
     )
     
     # Get database

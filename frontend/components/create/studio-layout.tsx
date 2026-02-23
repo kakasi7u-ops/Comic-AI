@@ -1,17 +1,30 @@
 "use client";
 
 import { useWizardStore } from "@/lib/store/wizard-store";
-import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Crown } from "lucide-react";
-import Link from "next/link";
+import { useAuthStore } from "@/lib/store/auth-store";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Crown, Loader2 } from "lucide-react";
+import Link from "next/link";
 
 interface StudioLayoutProps {
     children: React.ReactNode;
 }
 
+/**
+ * StudioLayout — minimal header for the create flow.
+ *
+ * Plan badge shows the user's REAL billing plan from the auth store,
+ * not the wizard's selectedPlan (which is a UI artifact, not billing truth).
+ */
 export function StudioLayout({ children }: StudioLayoutProps) {
-    const { selectedPlan } = useWizardStore();
+    const user = useAuthStore((state) => state.user);
+    const isSubmitting = useWizardStore((state) => state.isSubmitting);
+
+    // Display plan from backend — capitalize first letter for badge
+    const planLabel = user?.plan
+        ? user.plan.charAt(0).toUpperCase() + user.plan.slice(1)
+        : "—";
 
     return (
         <div className="min-h-screen bg-white dark:bg-zinc-950 flex flex-col">
@@ -31,12 +44,15 @@ export function StudioLayout({ children }: StudioLayoutProps) {
                 </div>
 
                 <div className="flex items-center gap-3">
+                    {isSubmitting && (
+                        <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                    )}
                     <span className="text-sm text-muted-foreground hidden sm:inline-block">
                         Creating as
                     </span>
                     <Badge variant="secondary" className="gap-1.5 px-3 py-1 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400 border-indigo-100 dark:border-indigo-900/50">
                         <Crown className="w-3.5 h-3.5" />
-                        {selectedPlan} Plan
+                        {planLabel} Plan
                     </Badge>
                 </div>
             </header>

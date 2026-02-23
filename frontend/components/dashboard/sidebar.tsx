@@ -4,9 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { LayoutDashboard, PenTool, CreditCard, User } from "lucide-react";
+import { useAuthStore } from "@/lib/store/auth-store";
 
 export function Sidebar({ className }: { className?: string }) {
     const pathname = usePathname();
+    const user = useAuthStore((state) => state.user);
+
+    const currentUsage = user?.generation_limits?.current_usage ?? 0;
+    const monthlyQuota = user?.generation_limits?.monthly_quota ?? 0;
+    const usagePercent =
+        monthlyQuota > 0 ? Math.min((currentUsage / monthlyQuota) * 100, 100) : 0;
 
     const routes = [
         {
@@ -40,7 +47,6 @@ export function Sidebar({ className }: { className?: string }) {
             <div className="px-3 py-2 flex-1">
                 <Link href="/dashboard" className="flex items-center pl-3 mb-14">
                     <div className="relative h-8 w-8 mr-4">
-                        {/* Placeholder for Logo */}
                         <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-lg animate-pulse" />
                     </div>
                     <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
@@ -67,11 +73,16 @@ export function Sidebar({ className }: { className?: string }) {
             </div>
             <div className="px-3 py-2">
                 <div className="bg-white/10 rounded-lg p-3">
-                    <h3 className="text-sm font-medium mb-2 text-zinc-400">Credits</h3>
+                    <h3 className="text-sm font-medium mb-2 text-zinc-400">Monthly Usage</h3>
                     <div className="h-2 w-full bg-zinc-700 rounded-full overflow-hidden">
-                        <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 w-2/3" />
+                        <div
+                            className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
+                            style={{ width: `${usagePercent}%` }}
+                        />
                     </div>
-                    <p className="text-xs text-zinc-500 mt-2">66 / 100 Credits Used</p>
+                    <p className="text-xs text-zinc-500 mt-2">
+                        {currentUsage} / {monthlyQuota} Comics Used
+                    </p>
                 </div>
             </div>
         </div>

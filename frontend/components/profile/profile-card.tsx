@@ -3,22 +3,29 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { User, LogOut, Settings, CreditCard } from "lucide-react";
-import { PlanType } from "@/lib/store/wizard-store";
+import type { UserPlan } from "@/lib/types/api";
 
 interface ProfileCardProps {
     name: string;
     email: string;
     avatar?: string;
-    plan: PlanType;
+    plan: UserPlan;
 }
 
-export function ProfileCard({ name, email, avatar, plan }: ProfileCardProps) {
-    const planColors = {
-        Free: "bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300",
-        Pro: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400",
-        Creative: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400"
-    };
+/** Maps backend lowercase plan to display label */
+const PLAN_LABELS: Record<UserPlan, string> = {
+    free: "Free",
+    pro: "Pro",
+    creative: "Creative",
+};
 
+const planColors: Record<UserPlan, string> = {
+    free: "bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300",
+    pro: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400",
+    creative: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+};
+
+export function ProfileCard({ name, email, avatar, plan }: ProfileCardProps) {
     return (
         <Card>
             <CardHeader className="flex flex-row items-center gap-4 pb-2">
@@ -31,7 +38,9 @@ export function ProfileCard({ name, email, avatar, plan }: ProfileCardProps) {
                 <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                         <CardTitle className="text-xl">{name}</CardTitle>
-                        <Badge variant="secondary" className={planColors[plan]}>{plan}</Badge>
+                        <Badge variant="secondary" className={planColors[plan]}>
+                            {PLAN_LABELS[plan] ?? plan}
+                        </Badge>
                     </div>
                     <CardDescription>{email}</CardDescription>
                 </div>
@@ -44,7 +53,7 @@ export function ProfileCard({ name, email, avatar, plan }: ProfileCardProps) {
                     <Settings className="mr-2 h-4 w-4" /> Account Settings
                 </Button>
                 <Button variant="outline" className="justify-start">
-                    <CreditCard className="mr-2 h-4 w-4" /> Billing & Invoices
+                    <CreditCard className="mr-2 h-4 w-4" /> Billing &amp; Invoices
                 </Button>
                 <div className="pt-2">
                     <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20">

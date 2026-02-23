@@ -4,11 +4,14 @@ import { ProfileCard } from "@/components/profile/profile-card";
 import { UsageCard } from "@/components/profile/usage-card";
 import { ProfileSkeleton } from "@/components/ui/skeletons";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { authApi } from "@/lib/api/auth";
 import { profileApi } from "@/lib/api/profile";
 import { User, Usage } from "@/lib/types/api";
 
 export default function ProfilePage() {
+    const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState<User | null>(null);
     const [usage, setUsage] = useState<Usage | null>(null);
@@ -18,19 +21,22 @@ export default function ProfilePage() {
             try {
                 const [userData, usageData] = await Promise.all([
                     authApi.getUserProfile(),
-                    profileApi.getUsage()
+                    profileApi.getUsage(),
                 ]);
                 setUser(userData);
                 setUsage(usageData);
-            } catch (error) {
-                console.error("Failed to load profile data", error);
+            } catch {
+                toast.error("Failed to load profile", {
+                    description: "Could not fetch your profile data. Please sign in again.",
+                });
+                router.replace("/login");
             } finally {
                 setIsLoading(false);
             }
         };
 
         loadData();
-    }, []);
+    }, [router]);
 
     if (isLoading || !user || !usage) {
         return <ProfileSkeleton />;
@@ -52,9 +58,7 @@ export default function ProfilePage() {
                     />
                 </div>
                 <div>
-                    <UsageCard
-                        usage={usage}
-                    />
+                    <UsageCard usage={usage} />
                 </div>
             </div>
         </div>

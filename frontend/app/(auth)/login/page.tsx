@@ -21,42 +21,38 @@ import { AuthCard } from "@/components/auth/auth-card"
 import { PasswordInput } from "@/components/auth/password-input"
 import { loginSchema, type LoginFormValues } from "@/lib/schemas/auth"
 import { useAuthStore } from "@/lib/store/auth-store"
+import { AxiosError } from "axios"
 
 export default function LoginPage() {
     const router = useRouter()
     const login = useAuthStore((state) => state.login)
     const [isLoading, setIsLoading] = useState(false)
+    // "Remember me" is UI-only — not sent to backend
+    const [remember, setRemember] = useState(false)
 
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
             email: "",
             password: "",
-            remember: false,
         },
     })
 
     async function onSubmit(data: LoginFormValues) {
         setIsLoading(true)
-
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-
         try {
-            login({
-                id: "1",
-                name: "Demo User",
-                email: data.email,
-                plan: "Free",
-            })
+            await login(data.email, data.password)
             toast.success("Welcome back!", {
                 description: "You have successfully signed in.",
             })
             router.push("/dashboard")
-        } catch {
-            toast.error("Something went wrong.", {
-                description: "Please try again.",
-            })
+        } catch (error) {
+            let message = "Invalid email or password. Please try again."
+            if (error instanceof AxiosError) {
+                const detail = error.response?.data?.detail
+                if (typeof detail === "string") message = detail
+            }
+            toast.error("Sign in failed", { description: message })
         } finally {
             setIsLoading(false)
         }
@@ -101,23 +97,19 @@ export default function LoginPage() {
                         )}
                     />
                     <div className="flex items-center justify-between">
-                        <FormField
-                            control={form.control}
-                            name="remember"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                                    <FormControl>
-                                        <Checkbox
-                                            checked={field.value}
-                                            onCheckedChange={field.onChange}
-                                        />
-                                    </FormControl>
-                                    <FormLabel className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                        Remember me
-                                    </FormLabel>
-                                </FormItem>
-                            )}
-                        />
+                        <div className="flex flex-row items-center space-x-2">
+                            <Checkbox
+                                id="remember"
+                                checked={remember}
+                                onCheckedChange={(checked) => setRemember(checked === true)}
+                            />
+                            <label
+                                htmlFor="remember"
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                                Remember me
+                            </label>
+                        </div>
                         <a
                             href="/forgot-password"
                             className="text-sm font-medium text-primary hover:underline"

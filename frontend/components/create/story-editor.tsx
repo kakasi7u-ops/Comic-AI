@@ -2,7 +2,7 @@
 
 import { useWizardStore } from "@/lib/store/wizard-store";
 import { Textarea } from "@/components/ui/textarea";
-import { Sparkles, Info, CheckCircle2 } from "lucide-react";
+import { Info, CheckCircle2 } from "lucide-react";
 
 import {
     Accordion,
@@ -11,17 +11,16 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 
+/**
+ * StoryEditor — text input for the comic story.
+ *
+ * RULES:
+ * - No plan limit display (backend enforces limits)
+ * - No page count calculation
+ * - Only sends text to store; submission happens in ReviewSection
+ */
 export function StoryEditor() {
-    const { storyText, setStory, selectedPlan } = useWizardStore();
-
-    // Derived limits based on plan (UI logic only)
-    const limits = {
-        Free: { pages: 1, label: "1 page per comic" },
-        Pro: { pages: 3, label: "Up to 3 pages" },
-        Creative: { pages: 99, label: "Unlimited pages" }
-    };
-
-    const currentLimit = limits[selectedPlan || "Pro"];
+    const { storyText, setStory } = useWizardStore();
 
     return (
         <div className="space-y-6">
@@ -42,23 +41,6 @@ export function StoryEditor() {
                     />
                     <div className="absolute bottom-4 right-4 text-xs text-muted-foreground pointer-events-none bg-white/80 dark:bg-zinc-950/80 px-2 py-1 rounded backdrop-blur-sm">
                         Supported: English, Hindi, Hinglish
-                    </div>
-                </div>
-            </div>
-
-            {/* Smart Limit Feedback */}
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-indigo-50/50 dark:bg-indigo-950/10 p-4 rounded-lg border border-indigo-100 dark:border-indigo-900/20">
-                <div className="flex items-start gap-3">
-                    <div className="mt-1 bg-indigo-100 dark:bg-indigo-900/50 p-1.5 rounded-full">
-                        <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                    </div>
-                    <div>
-                        <h4 className="text-sm font-medium text-indigo-900 dark:text-indigo-200">
-                            AI Output Preview
-                        </h4>
-                        <p className="text-sm text-indigo-700 dark:text-indigo-400 mt-0.5">
-                            Based on your <strong>{selectedPlan} Plan</strong>, this will be generated as <strong>{currentLimit.pages} pages</strong>.
-                        </p>
                     </div>
                 </div>
             </div>

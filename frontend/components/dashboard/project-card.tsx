@@ -8,21 +8,29 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { ProjectStatus } from "@/lib/types/api";
 
 interface ProjectCardProps {
     title: string;
     updatedAt: string;
-    status: "Draft" | "Generating" | "Completed" | "Failed";
+    status: ProjectStatus;
     thumbnail?: string;
 }
 
+/**
+ * Status badge styles — keyed by display status.
+ * "Unknown" is a safe fallback for any unrecognized backend value.
+ */
+const STATUS_STYLES: Record<ProjectStatus, string> = {
+    Draft: "bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300",
+    Generating: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 animate-pulse",
+    Completed: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+    Failed: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+    Unknown: "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-500",
+};
+
 export function ProjectCard({ title, updatedAt, status, thumbnail }: ProjectCardProps) {
-    const statusColor = {
-        Draft: "bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300",
-        Generating: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 animate-pulse",
-        Completed: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-        Failed: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-    };
+    const badgeClass = STATUS_STYLES[status] ?? STATUS_STYLES.Unknown;
 
     return (
         <Card className="group overflow-hidden border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300">
@@ -37,7 +45,7 @@ export function ProjectCard({ title, updatedAt, status, thumbnail }: ProjectCard
                     </div>
                 )}
                 <div className="absolute top-3 right-3">
-                    <Badge variant="secondary" className={statusColor[status]}>{status}</Badge>
+                    <Badge variant="secondary" className={badgeClass}>{status}</Badge>
                 </div>
             </div>
 
